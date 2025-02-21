@@ -8,4 +8,4 @@ generating math quiz for Kyle
 
 options:
   -h, --help                        show this help message and exit
-  -p, --pageCount PAGECOUNT         how mane pages to generate
+  -p, --pageCount PAGECOUNT         how many pages to generate
