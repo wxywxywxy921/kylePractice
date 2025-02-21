@@ -2,6 +2,7 @@ import random
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from datetime import date
+import argparse
 
 # Function to generate random problems
 def generate_problems(num_problems, operation):
@@ -41,11 +42,10 @@ def generate_problems(num_problems, operation):
     return problems, solutions
 
 # Function to export problems to a PDF
-def export_to_pdf(problems, filename, num_problems, pageIndex):
-    c = canvas.Canvas(filename, pagesize=letter)
+def export_to_pdf(problems, pdfFile, num_problems, pageIndex):
     width, height = letter
 
-    c.setFont("Helvetica", 12)
+    pdfFile.setFont("Helvetica", 12)
     margin = 50
     line_height = 16
     problems_per_row = 4
@@ -55,26 +55,26 @@ def export_to_pdf(problems, filename, num_problems, pageIndex):
     today = date.today()
     formatted_date = today.strftime("%B %d, %Y")
     title = "Math Practice Problems: " + formatted_date + " : page: {}".format(pageIndex)
-    c.drawString(x, y, title)
+    pdfFile.drawString(x, y, title)
     y -= line_height * 2
 
     for i, problem in enumerate(problems, start=1):
-        c.drawString(x, y, f"{problem}")
+        pdfFile.drawString(x, y, f"{problem}")
         x += width / problems_per_row - 20
         if i % problems_per_row == 0:
             x = x_start
             y -= line_height
         if y < margin:  # Start a new page if space runs out
-            c.showPage()
-            c.setFont("Helvetica", 10)
+            pdfFile.showPage()
+            pdfFile.setFont("Helvetica", 10)
             y = y_start
         if i % num_problems  == 0:
             x = x_start
             y -= line_height * 2
 
-    c.save()
+    pdfFile.showPage()
 
-def generate_problem_one_page(pageIndex):
+def generate_problem_one_page(pageIndex, pdfQuiz, pdfSolution):
     # Generate problems and export
     num_problems = 28
     operations = ['+', '-', '*', '/']
@@ -86,15 +86,27 @@ def generate_problem_one_page(pageIndex):
         problems = problems + problemsTemp
         solutions = solutions + solutionsTemp
 
-    export_to_pdf(problems, "math_practice_{}.pdf".format(pageIndex), num_problems, pageIndex)
-    export_to_pdf(solutions, "math_solution_{}.pdf".format(pageIndex), num_problems, pageIndex)
+    export_to_pdf(problems, pdfQuiz, num_problems, pageIndex)
+    export_to_pdf(solutions, pdfSolution, num_problems, pageIndex)
 
     print("PDF with math practice problems has been created. page: {}".format(pageIndex))
 
 def main():
-    num_page = 20
-    for pageIndex in range(num_page):
-        generate_problem_one_page(pageIndex)
+    parser = argparse.ArgumentParser(description="generating math quiz for Kyle")
+    parser.add_argument("-p", "--pageCount", type=int, help="how mane pages to generate", default=1)
+    args = parser.parse_args()
+
+    pdfQuizName = "math_practice.pdf"
+    pdfSolutionName = "math_solution.pdf"
+
+    pdfQuiz = canvas.Canvas(pdfQuizName, pagesize=letter)
+    pdfSolution = canvas.Canvas(pdfSolutionName, pagesize=letter)
+
+    for pageIndex in range(args.pageCount):
+        generate_problem_one_page(pageIndex, pdfQuiz, pdfSolution)
+
+    pdfQuiz.save()
+    pdfSolution.save()
 
 
 if __name__ == "__main__":
