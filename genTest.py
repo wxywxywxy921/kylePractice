@@ -41,7 +41,7 @@ def generate_problems(num_problems, operation):
     return problems, solutions
 
 # Function to export problems to a PDF
-def export_to_pdf(problems, filename, num_problems):
+def export_to_pdf(problems, filename, num_problems, pageIndex):
     c = canvas.Canvas(filename, pagesize=letter)
     width, height = letter
 
@@ -54,7 +54,7 @@ def export_to_pdf(problems, filename, num_problems):
 
     today = date.today()
     formatted_date = today.strftime("%B %d, %Y")
-    title = "Math Practice Problems: " + formatted_date
+    title = "Math Practice Problems: " + formatted_date + " : page: {}".format(pageIndex)
     c.drawString(x, y, title)
     y -= line_height * 2
 
@@ -74,18 +74,30 @@ def export_to_pdf(problems, filename, num_problems):
 
     c.save()
 
-# Generate problems and export
-num_problems = 28
-operations = ['+', '-', '*', '/']
-problems = []
-solutions = []
+def generate_problem_one_page(pageIndex):
+    # Generate problems and export
+    num_problems = 28
+    operations = ['+', '-', '*', '/']
+    problems = []
+    solutions = []
 
-for operation in operations:
-    problemsTemp, solutionsTemp = generate_problems(num_problems, operation)
-    problems = problems + problemsTemp
-    solutions = solutions + solutionsTemp
+    for operation in operations:
+        problemsTemp, solutionsTemp = generate_problems(num_problems, operation)
+        problems = problems + problemsTemp
+        solutions = solutions + solutionsTemp
 
-export_to_pdf(problems, "math_practice.pdf", num_problems)
-export_to_pdf(solutions, "math_solutions.pdf", num_problems)
+    export_to_pdf(problems, "math_practice_{}.pdf".format(pageIndex), num_problems, pageIndex)
+    export_to_pdf(solutions, "math_solution_{}.pdf".format(pageIndex), num_problems, pageIndex)
 
-print("PDF with math practice problems has been created.")
+    print("PDF with math practice problems has been created. page: {}".format(pageIndex))
+
+def main():
+    num_page = 20
+    for pageIndex in range(num_page):
+        generate_problem_one_page(pageIndex)
+
+
+if __name__ == "__main__":
+    main()
+
+
